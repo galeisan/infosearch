@@ -18,7 +18,12 @@ def get_tokens_from_page(page):
     with open(page, 'r') as file:
         html_content = file.read()
 
-    soup = BeautifulSoup(html_content, 'html.parser')
+    soup = BeautifulSoup(html_content, 'html.parser').find('body')
+
+    # удаляем ненужные теги
+    for script in soup(["script", "style", "a", "span", "button", "label", "footer", "article"]):
+        script.extract()
+
     # извлечение текста из HTML, удаляем все пробелы и переносы
     text = soup.get_text(separator=' ', strip=True)
 
