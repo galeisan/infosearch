@@ -99,7 +99,7 @@ def calculate_tf_idf(tf, idf):
     return tf_idf
 
 
-# Вычисляем косинусное сходство сектора запроса и векторов документов
+# Вычисляем косинусное сходство вектора запроса и векторов документов
 def calculate_similarities(query):
     res = calculate_tf_idf(calculate_tf(query), calculate_idf(tokens_count_by_pages, query))
     # Преобразуем словарь в DataFrame
