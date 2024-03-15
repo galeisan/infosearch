@@ -4,6 +4,7 @@ import os
 import numpy as np
 import pandas as pd
 import pymorphy2
+from nltk.corpus import stopwords
 from sklearn.metrics.pairwise import cosine_similarity
 from task4 import morph
 
@@ -49,6 +50,8 @@ df_tf_idf = create_vector_matrix()
 def calculate_tf(query):
     morph = pymorphy2.MorphAnalyzer()
     words = query.split()
+    stop_words = stopwords.words("russian")
+    words = [word for word in words if word not in stop_words]
     # Подсчитываем количество вхождений каждого слова в предложении
     word_counts = {}
     for word in words:
@@ -99,7 +102,7 @@ def calculate_tf_idf(tf, idf):
     return tf_idf
 
 
-# Вычисляем косинусное сходство сектора запроса и векторов документов
+# Вычисляем косинусное сходство вектора запроса и векторов документов
 def calculate_similarities(query):
     res = calculate_tf_idf(calculate_tf(query), calculate_idf(tokens_count_by_pages, query))
     # Преобразуем словарь в DataFrame
@@ -108,7 +111,6 @@ def calculate_similarities(query):
     # Переиндексируем DataFrame
     vector_df = vector_df.reindex(df_tf_idf.columns, fill_value=0.0)
 
-    vector_df = vector_df.reindex(df_tf_idf.columns, fill_value=0.0)
 
     # Вычисляем косинусное сходство
     cos_sim = cosine_similarity(vector_df.values.reshape(1, -1), df_tf_idf.values)
