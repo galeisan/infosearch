@@ -6,12 +6,14 @@ import pandas as pd
 import pymorphy2
 from nltk.corpus import stopwords
 from sklearn.metrics.pairwise import cosine_similarity
-from task4 import morph
 
-input_folder = 'lemmas_tf-idf'
+morph = pymorphy2.MorphAnalyzer()
+stop_words = stopwords.words("russian")
+
+input_folder = '/Users/lyaysanz/Desktop/infosearch/lemmas_tf-idf'
 n_docs = len(os.listdir(input_folder))
-lemmas_file = 'lemmas.txt'
-inverted_index_file = 'inverted_index.txt'
+lemmas_file = '/Users/lyaysanz/Desktop/infosearch/lemmas.txt'
+inverted_index_file = '/Users/lyaysanz/Desktop/infosearch/inverted_index.txt'
 words_set = []
 
 with open(lemmas_file, 'r', encoding='utf-8') as file:
@@ -48,9 +50,7 @@ df_tf_idf = create_vector_matrix()
 
 # Считаем tf запроса
 def calculate_tf(query):
-    morph = pymorphy2.MorphAnalyzer()
     words = query.split()
-    stop_words = stopwords.words("russian")
     words = [word for word in words if word not in stop_words]
     # Подсчитываем количество вхождений каждого слова в предложении
     word_counts = {}
@@ -71,6 +71,7 @@ def calculate_tf(query):
 # Считаем idf запроса
 def calculate_idf(token_counts, query):
     tokens = query.split()
+    tokens = [token for token in tokens if token not in stop_words]
     lemmas = []
     for token in tokens:
         lemmas.append(morph.parse(token)[0].normal_form)
@@ -111,7 +112,6 @@ def calculate_similarities(query):
     # Переиндексируем DataFrame
     vector_df = vector_df.reindex(df_tf_idf.columns, fill_value=0.0)
 
-
     # Вычисляем косинусное сходство
     cos_sim = cosine_similarity(vector_df.values.reshape(1, -1), df_tf_idf.values)
 
@@ -134,12 +134,12 @@ while True:
     try:
         print(calculate_similarities(query))
         result = calculate_similarities(query)
+        dict_items = result.items()
+        with open('pages/index.txt', 'r') as file:
+            links = file.read().splitlines()
+            for key, value in dict_items:
+                if value > 0:
+                    print(links[int(key) - 1])
     except Exception as e:
         print(f"Error occurred: {e}. Please try again")
 
-    dict_items = result.items()
-    with open('pages/index.txt', 'r') as file:
-        links = file.read().splitlines()
-        for key, value in dict_items:
-            if value > 0:
-                print(links[int(key) - 1])
